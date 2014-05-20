@@ -7,7 +7,7 @@ This gem adds Quill to your Rails 3/4 asset pipeline.
 
 Add the following lines to your applications Gemfile:
 
-gem 'quill-rails', '~> 0.0.1'
+gem 'quill-rails', '~> 0.0.2'
 Then run bundle install to update your application's bundle.
 
 Add Quill to your manifest in app/assets/javascripts/application.js:
