@@ -6,7 +6,7 @@ Gem::Specification.new do |s|
   s.authors     = ["Robert Wiegmann"]
   s.email       = ["robert.wiegmann@gmail.com"]
   s.homepage    = "https://github.com/the-robear/quill-rails"
-  s.licenses    = ["Quill is All rights reserved", "Copyright (c) 2013, salesforce.com"]
+  s.licenses    = ["BSD 3 Clause", "Copyright (c) 2013, salesforce.com"]
 
   s.summary     = "Quill.js for Rails 3.1/4.0"
   s.description = "This gem provides the Quill.js Rich Text Editor assets and view helper for your Rails 3.1/4.0 application."
