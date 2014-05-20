@@ -6,11 +6,11 @@ Gem::Specification.new do |s|
   s.authors     = ["Robert Wiegmann"]
   s.email       = ["robert.wiegmann@gmail.com"]
   s.homepage    = "https://github.com/the-robear/quill-rails"
-  s.licenses    = ["MIT", "Creative Commons by-nc"]
+  s.licenses    = ["All rights reserved", "Copyright (c) 2013, salesforce.com"]
 
   s.summary     = "Quill.js for Rails 3.1/4.0"
   s.description = "This gem provides the Quill.js Rich Text Editor assets for your Rails 3.1/4.0 application."
-  s.files       = Dir["{app,lib}/**/*"] + ["MIT-LICENSE", "Rakefile", "Gemfile", "README.md"]
+  s.files       = Dir["{app,lib}/**/*"] + ["LICENSE", "Gemfile", "README.md"]
   s.version     = Quill::Rails::VERSION
 
   s.add_dependency "railties", ">= 3.1.0", "< 5.0"
