@@ -5,7 +5,10 @@ This gem provides Rails 3/4 asset pipeline loading for [Quill](http://quilljs.co
 
 Add the following lines to your applications Gemfile:
 
+```
 gem 'quill-rails', '~> 0.1.0'
+```
+
 Then run bundle install to update your application's bundle.
 
 Add Quill to your manifest in app/assets/javascripts/application.js:
