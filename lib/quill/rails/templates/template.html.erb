@@ -125,7 +125,7 @@
     });
 
     fullEditor.on('text-change', function(delta, source) {
-      document.getElementById('<%= @input_id %>').value = fullEditor.getContents()
+      document.getElementById('<%= @input_id %>').value = fullEditor.getHTML()
     });
   </script>
 </div>
