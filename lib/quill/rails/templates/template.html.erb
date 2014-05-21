@@ -112,15 +112,20 @@
   </div>
   <div id="full-editor" class="editor">
   </div>
-</div>
+  <input type='hidden' name='<%= @input_name %>' id='<%= @input_id %>' value=''/>
 
-<script type='text/javascript'>
-  // Initialize editor with custom theme and modules
-  var fullEditor = new Quill('#full-editor', {
-    modules: {
-      'toolbar': { container: '#full-toolbar' },
-      'link-tooltip': true
-    },
-    theme: 'snow'
-  });
-</script>
+  <script type='text/javascript'>
+    // Initialize editor with custom theme and modules
+    var fullEditor = new Quill('#full-editor', {
+      modules: {
+        'toolbar': { container: '#full-toolbar' },
+        'link-tooltip': true
+      },
+      theme: 'snow'
+    });
+
+    fullEditor.on('text-change', function(delta, source) {
+      document.getElementById('<%= @input_id %>').value = fullEditor.getContents()
+    });
+  </script>
+</div>
