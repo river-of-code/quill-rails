@@ -55,6 +55,13 @@ To have an id that's different from the name:
 <%= quill_editor nil, { name: 'my-name', id: 'my-id' } %>
 ```
 
+You can provide a prefilled value if you pass a value attribute into the hash:
+
+```
+<%= quill_editor nil, { name: 'my-name', id: 'my-id', value: "Awesome!" } %>
+```
+
+
 ## Custom Functionality
 
 Because this includes Quill assets, you can also refer to the [Quill Documentation](http://quilljs.com/docs/editor/) to use other, more custom, features.
