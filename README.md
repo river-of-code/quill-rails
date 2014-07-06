@@ -55,7 +55,7 @@ To have an id that's different from the name:
 <%= quill_editor nil, { name: 'my-name', id: 'my-id' } %>
 ```
 
-To have a value on load:
+To have an initial value in the editor:
 
 ```
 <%= quill_editor nil, { name: 'my-name', value: 'Awesome!' } %>
@@ -65,11 +65,17 @@ To have a value on load:
 
 Because this includes Quill assets, you can also refer to the [Quill Documentation](http://quilljs.com/docs/editor/) to use other, more custom, features.
 
+# Changelog
+
+### 0.1.4
+* Added 'value' option for the helper function (thanks nerdyglasses!)
+* Updated from Quill 0.13 to 0.15
+
 # Roadmap
 
 The following features would be nice to have:
 
-- Configuring the default quill_editor e.g. pass in content, change wrapper, change theme, etc.
+- Configuring the default quill_editor e.g. change wrapper, change theme, etc.
 - Have a form helper tag (f.quill_editor)
 - Parse any RTE input for malicious tags
 

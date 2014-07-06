@@ -1,4 +1,4 @@
-!function(e){if("object"==typeof exports)module.exports=e();else if("function"==typeof define&&define.amd)define(e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.Quill=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
+!function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.Quill=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -7935,8 +7935,7 @@ module.exports=_dereq_('4HJaAd');
     }
 
     Delta.prototype.apply = function(insertFn, deleteFn, applyAttrFn, context) {
-      var index, offset, retains,
-        _this = this;
+      var index, offset, retains;
       if (insertFn == null) {
         insertFn = (function() {});
       }
@@ -7955,34 +7954,38 @@ module.exports=_dereq_('4HJaAd');
       index = 0;
       offset = 0;
       retains = [];
-      _.each(this.ops, function(op) {
-        if (Op.isInsert(op)) {
-          insertFn.call(context, index + offset, op.value, op.attributes);
-          return offset += op.getLength();
-        } else if (Op.isRetain(op)) {
-          if (op.start > index) {
-            deleteFn.call(context, index + offset, op.start - index);
-            offset -= op.start - index;
+      _.each(this.ops, (function(_this) {
+        return function(op) {
+          if (Op.isInsert(op)) {
+            insertFn.call(context, index + offset, op.value, op.attributes);
+            return offset += op.getLength();
+          } else if (Op.isRetain(op)) {
+            if (op.start > index) {
+              deleteFn.call(context, index + offset, op.start - index);
+              offset -= op.start - index;
+            }
+            retains.push(new RetainOp(op.start + offset, op.end + offset, op.attributes));
+            return index = op.end;
           }
-          retains.push(new RetainOp(op.start + offset, op.end + offset, op.attributes));
-          return index = op.end;
-        }
-      });
+        };
+      })(this));
       if (this.endLength < this.startLength + offset) {
         deleteFn.call(context, this.endLength, this.startLength + offset - this.endLength);
       }
-      return _.each(retains, function(op) {
-        _.each(op.attributes, function(value, format) {
-          if (value === null) {
-            return applyAttrFn.call(context, op.start, op.end - op.start, format, value);
-          }
-        });
-        return _.each(op.attributes, function(value, format) {
-          if (value != null) {
-            return applyAttrFn.call(context, op.start, op.end - op.start, format, value);
-          }
-        });
-      });
+      return _.each(retains, (function(_this) {
+        return function(op) {
+          _.each(op.attributes, function(value, format) {
+            if (value === null) {
+              return applyAttrFn.call(context, op.start, op.end - op.start, format, value);
+            }
+          });
+          return _.each(op.attributes, function(value, format) {
+            if (value != null) {
+              return applyAttrFn.call(context, op.start, op.end - op.start, format, value);
+            }
+          });
+        };
+      })(this));
     };
 
     Delta.prototype.applyToText = function(text) {
@@ -8430,15 +8433,16 @@ module.exports=_dereq_('4HJaAd');
     };
 
     Delta.prototype.merge = function(other) {
-      var ops,
-        _this = this;
-      ops = _.map(other.ops, function(op) {
-        if (Op.isRetain(op)) {
-          return new RetainOp(op.start + _this.startLength, op.end + _this.startLength, op.attributes);
-        } else {
-          return op;
-        }
-      });
+      var ops;
+      ops = _.map(other.ops, (function(_this) {
+        return function(op) {
+          if (Op.isRetain(op)) {
+            return new RetainOp(op.start + _this.startLength, op.end + _this.startLength, op.attributes);
+          } else {
+            return op;
+          }
+        };
+      })(this));
       ops = this.ops.concat(ops);
       return new Delta(this.startLength + other.startLength, ops);
     };
@@ -8627,8 +8631,7 @@ module.exports=_dereq_('4HJaAd');
         }, 0);
       },
       formatAt: function(delta, formatPoint, numToFormat, attrs, reference) {
-        var attr, charIndex, cur, curFormat, head, op, ops, reachedFormatPoint, tail, _formatBooleanAttribute, _formatNonBooleanAttribute, _i, _j, _len, _len1, _limitScope, _ref, _ref1, _splitOpInThree,
-          _this = this;
+        var attr, charIndex, cur, curFormat, head, op, ops, reachedFormatPoint, tail, _formatBooleanAttribute, _formatNonBooleanAttribute, _i, _j, _len, _len1, _limitScope, _ref, _ref1, _splitOpInThree;
         _splitOpInThree = function(elem, splitAt, length, reference) {
           var cur, curStr, head, headStr, marker, newCur, op, origOps, tail, tailStr, _i, _len;
           if (InsertOp.isInsert(elem)) {
@@ -8727,37 +8730,39 @@ module.exports=_dereq_('4HJaAd');
             }
           }
         };
-        _formatNonBooleanAttribute = function(op, tail, attr, reference) {
-          var getNewAttrVal, referenceOps;
-          getNewAttrVal = function(prevVal) {
-            if (prevVal != null) {
-              return _.first(_.shuffle(_.without(domain.nonBooleanAttributes[attr], prevVal)));
-            } else {
-              return _.first(_.shuffle(_.without(domain.nonBooleanAttributes[attr], domain.defaultAttributeValue[attr])));
-            }
-          };
-          if (InsertOp.isInsert(op)) {
-            return op.attributes[attr] = getNewAttrVal(attr, op.attributes[attr]);
-          } else {
-            if (!RetainOp.isRetain(op)) {
-              throw new Error("Expected retain but got " + op);
-            }
-            referenceOps = reference.getOpsAt(op.start, op.getLength());
-            if (!_.every(referenceOps, function(op) {
-              return InsertOp.isInsert(op);
-            })) {
-              throw new Error("Formatting a retain that does not refer to an insert.");
-            }
-            if (referenceOps.length > 0) {
-              _limitScope(op, tail, attr, referenceOps);
-              if ((op.attributes[attr] != null) && Math.random() < 0.5) {
-                return delete op.attributes[attr];
+        _formatNonBooleanAttribute = (function(_this) {
+          return function(op, tail, attr, reference) {
+            var getNewAttrVal, referenceOps;
+            getNewAttrVal = function(prevVal) {
+              if (prevVal != null) {
+                return _.first(_.shuffle(_.without(domain.nonBooleanAttributes[attr], prevVal)));
               } else {
-                return op.attributes[attr] = getNewAttrVal(op.attributes[attr]);
+                return _.first(_.shuffle(_.without(domain.nonBooleanAttributes[attr], domain.defaultAttributeValue[attr])));
+              }
+            };
+            if (InsertOp.isInsert(op)) {
+              return op.attributes[attr] = getNewAttrVal(attr, op.attributes[attr]);
+            } else {
+              if (!RetainOp.isRetain(op)) {
+                throw new Error("Expected retain but got " + op);
+              }
+              referenceOps = reference.getOpsAt(op.start, op.getLength());
+              if (!_.every(referenceOps, function(op) {
+                return InsertOp.isInsert(op);
+              })) {
+                throw new Error("Formatting a retain that does not refer to an insert.");
+              }
+              if (referenceOps.length > 0) {
+                _limitScope(op, tail, attr, referenceOps);
+                if ((op.attributes[attr] != null) && Math.random() < 0.5) {
+                  return delete op.attributes[attr];
+                } else {
+                  return op.attributes[attr] = getNewAttrVal(op.attributes[attr]);
+                }
               }
             }
-          }
-        };
+          };
+        })(this);
         charIndex = 0;
         ops = [];
         _ref = delta.ops;
@@ -8955,30 +8960,31 @@ module.exports=_dereq_('4HJaAd');
     };
 
     Op.prototype.composeAttributes = function(attributes) {
-      var resolveAttributes,
-        _this = this;
-      resolveAttributes = function(oldAttrs, newAttrs) {
-        var key, resolvedAttrs, value;
-        if (!newAttrs) {
-          return oldAttrs;
-        }
-        resolvedAttrs = _.clone(oldAttrs);
-        for (key in newAttrs) {
-          value = newAttrs[key];
-          if (Op.isInsert(_this) && value === null) {
-            delete resolvedAttrs[key];
-          } else if (typeof value !== 'undefined') {
-            if (typeof resolvedAttrs[key] === 'object' && typeof value === 'object' && _.all([resolvedAttrs[key], newAttrs[key]], (function(val) {
-              return val !== null;
-            }))) {
-              resolvedAttrs[key] = resolveAttributes(resolvedAttrs[key], value);
-            } else {
-              resolvedAttrs[key] = value;
+      var resolveAttributes;
+      resolveAttributes = (function(_this) {
+        return function(oldAttrs, newAttrs) {
+          var key, resolvedAttrs, value;
+          if (!newAttrs) {
+            return oldAttrs;
+          }
+          resolvedAttrs = _.clone(oldAttrs);
+          for (key in newAttrs) {
+            value = newAttrs[key];
+            if (Op.isInsert(_this) && value === null) {
+              delete resolvedAttrs[key];
+            } else if (typeof value !== 'undefined') {
+              if (typeof resolvedAttrs[key] === 'object' && typeof value === 'object' && _.all([resolvedAttrs[key], newAttrs[key]], (function(val) {
+                return val !== null;
+              }))) {
+                resolvedAttrs[key] = resolveAttributes(resolvedAttrs[key], value);
+              } else {
+                resolvedAttrs[key] = value;
+              }
             }
           }
-        }
-        return resolvedAttrs;
-      };
+          return resolvedAttrs;
+        };
+      })(this);
       return resolveAttributes(this.attributes, attributes);
     };
 
@@ -11943,7 +11949,7 @@ module.exports=_dereq_('Fq7WE+');
 },{}],18:[function(_dereq_,module,exports){
 module.exports={
   "name": "quilljs",
-  "version": "0.13.4",
+  "version": "0.15.1",
   "description": "Cross browser rich text editor",
   "author": "Jason Chen <jhchen7@gmail.com>",
   "homepage": "http://quilljs.com",
@@ -11955,26 +11961,26 @@ module.exports={
   "dependencies": {
     "eventemitter2": "~0.4.13",
     "lodash": "~2.4.1",
-    "tandem-core": "~0.5.2",
+    "tandem-core": "~0.6.1",
     "underscore.string": "~2.3.3"
   },
   "devDependencies": {
-    "async": "~0.6.2",
+    "async": "~0.9.0",
     "coffeeify": "~0.6.0",
     "grunt": "~0.4.3",
-    "grunt-browserify": "~2.0.7",
+    "grunt-browserify": "~2.1.0",
     "grunt-contrib-clean": "~0.5.0",
     "grunt-contrib-coffee": "~0.10.1",
-    "grunt-contrib-concat": "~0.3.0",
+    "grunt-contrib-concat": "~0.4.0",
     "grunt-contrib-connect": "~0.7.1",
     "grunt-contrib-jade": "~0.11.0",
-    "grunt-contrib-stylus": "~0.13.2",
+    "grunt-contrib-stylus": "~0.16.0",
     "grunt-contrib-uglify": "~0.4.0",
     "grunt-contrib-watch": "~0.6.1",
     "grunt-karma": "~0.8.0",
     "grunt-newer": "~0.7.0",
     "grunt-protractor-runner": "~0.2.4",
-    "grunt-shell": "~0.6.4",
+    "grunt-shell": "~0.7.0",
     "istanbul": "~0.2.6",
     "jquery": "~1.11.0",
     "karma": "~0.12.0",
@@ -11988,7 +11994,7 @@ module.exports={
     "karma-safari-launcher": "~0.1.1",
     "karma-sauce-launcher": "~0.2.2",
     "load-grunt-tasks": "~0.4.0",
-    "protractor": "~0.21.0"
+    "protractor": "~0.23.0"
   },
   "engines": {
     "node": ">=0.10"
@@ -12065,7 +12071,7 @@ Document = (function() {
 
   Document.prototype.findLine = function(node) {
     var line;
-    while ((node != null) && node.parentNode !== this.root) {
+    while ((node != null) && (DOM.BLOCK_TAGS[node.tagName] == null)) {
       node = node.parentNode;
     }
     line = node != null ? this.lineMap[node.id] : null;
@@ -12143,14 +12149,17 @@ Document = (function() {
     var lineNode, lines, _results;
     lines = this.lines.toArray();
     lineNode = this.root.firstChild;
+    if ((lineNode != null) && (DOM.LIST_TAGS[lineNode.tagName] != null)) {
+      lineNode = lineNode.firstChild;
+    }
     _.each(lines, (function(_this) {
       return function(line, index) {
-        var newLine;
+        var newLine, _ref;
         while (line.node !== lineNode) {
-          if (line.node.parentNode === _this.root) {
+          if (line.node.parentNode === _this.root || ((_ref = line.node.parentNode) != null ? _ref.parentNode : void 0) === _this.root) {
             lineNode = Normalizer.normalizeLine(lineNode);
             newLine = _this.insertLineBefore(lineNode, line);
-            lineNode = lineNode.nextSibling;
+            lineNode = Utils.getNextLineNode(lineNode, _this.root);
           } else {
             return _this.removeLine(line);
           }
@@ -12159,21 +12168,25 @@ Document = (function() {
           line.node = Normalizer.normalizeLine(line.node);
           line.rebuild();
         }
-        return lineNode = line.node.nextSibling;
+        return lineNode = Utils.getNextLineNode(lineNode, _this.root);
       };
     })(this));
     _results = [];
     while (lineNode != null) {
       lineNode = Normalizer.normalizeLine(lineNode);
       this.appendLine(lineNode);
-      _results.push(lineNode = lineNode.nextSibling);
+      _results.push(lineNode = Utils.getNextLineNode(lineNode, this.root));
     }
     return _results;
   };
 
   Document.prototype.removeLine = function(line) {
-    if (line.node.parentNode === this.root) {
-      DOM.removeNode(line.node);
+    if (line.node.parentNode != null) {
+      if (DOM.LIST_TAGS[line.node.parentNode.tagName] && line.node.parentNode.childNodes.length === 1) {
+        DOM.removeNode(line.node.parentNode);
+      } else {
+        DOM.removeNode(line.node);
+      }
     }
     delete this.lineMap[line.id];
     return this.lines.remove(line);
@@ -12295,6 +12308,10 @@ DOM = {
   EMBED_TAGS: {
     'IMG': 'IMG'
   },
+  LIST_TAGS: {
+    'OL': 'OL',
+    'UL': 'UL'
+  },
   VOID_TAGS: {
     'AREA': 'AREA',
     'BASE': 'BASE',
@@ -12334,6 +12351,10 @@ DOM = {
       }
       return propogate;
     });
+  },
+  addStyles: function(node, styles) {
+    styles = _.defaults(styles, DOM.getStyles(node));
+    return DOM.setStyles(node, styles);
   },
   clearAttributes: function(node, exception) {
     if (exception == null) {
@@ -12410,9 +12431,6 @@ DOM = {
         }
         if (node.textContent != null) {
           return node.textContent;
-        }
-        if (node.innerText != null) {
-          return node.innerText.replace(/[\r\n]/g, '');
         }
         return "";
       case DOM.TEXT_NODE:
@@ -12531,6 +12549,11 @@ DOM = {
       return DOM.triggerEvent(select, 'change');
     }
   },
+  setAttributes: function(node, attributes) {
+    return _.each(attributes, function(value, name) {
+      return node.setAttribute(name, value);
+    });
+  },
   setStyles: function(node, styles) {
     var styleString;
     styleString = _.map(styles, function(style, name) {
@@ -12541,12 +12564,7 @@ DOM = {
   setText: function(node, text) {
     switch (node.nodeType) {
       case DOM.ELEMENT_NODE:
-        if (node.textContent != null) {
-          return node.textContent = text;
-        } else {
-          return node.innerText = text;
-        }
-        break;
+        return node.textContent = text;
       case DOM.TEXT_NODE:
         return node.data = text;
     }
@@ -12555,7 +12573,7 @@ DOM = {
     var attributes, newNode;
     newTag = newTag.toUpperCase();
     if (node.tagName === newTag) {
-      return;
+      return node;
     }
     newNode = node.ownerDocument.createElement(newTag);
     attributes = DOM.getAttributes(node);
@@ -12630,11 +12648,16 @@ DOM = {
     return ret;
   },
   wrap: function(wrapper, node) {
+    var parent;
     if (node.parentNode != null) {
       node.parentNode.insertBefore(wrapper, node);
     }
-    wrapper.appendChild(node);
-    return wrapper;
+    parent = wrapper;
+    while (parent.firstChild != null) {
+      parent = wrapper.firstChild;
+    }
+    parent.appendChild(node);
+    return parent;
   }
 };
 
@@ -12663,11 +12686,11 @@ Editor = (function() {
     this.iframeContainer = iframeContainer;
     this.quill = quill;
     this.options = options != null ? options : {};
-    this.renderer = new Renderer(this.iframeContainer, this.quill, this.options);
+    this.renderer = new Renderer(this.iframeContainer, this.options);
     this.root = this.renderer.root;
     this.doc = new Document(this.root, this.options);
     this.delta = this.doc.toDelta();
-    this.selection = new Selection(this.doc, this.quill);
+    this.selection = new Selection(this.doc, this.renderer.iframe, this.quill);
     this.timer = setInterval(_.bind(this.checkUpdate, this), this.options.pollInterval);
     this.quill.on(this.quill.constructor.events.SELECTION_CHANGE, (function(_this) {
       return function(range) {
@@ -12819,7 +12842,9 @@ Editor = (function() {
             line.insertText(offset, lineText, formatting);
             if (i < lineTexts.length - 1) {
               nextLine = _this.doc.splitLine(line, offset + lineText.length);
-              line.format(formatting);
+              _.each(_.defaults({}, formatting, line.formats), function(value, format) {
+                return line.format(format, formatting[format]);
+              });
               offset = 0;
             }
           }
@@ -12953,24 +12978,19 @@ Format = (function() {
     align: {
       type: Format.types.LINE,
       style: 'textAlign',
-      "default": 'left',
-      prepare: function(doc, value) {
-        var command;
-        switch (value) {
-          case 'left':
-            command = 'justifyLeft';
-            break;
-          case 'center':
-            command = 'justifyCenter';
-            break;
-          case 'right':
-            command = 'justifyRight';
-            break;
-          case 'justify':
-            command = 'justifyFull';
-        }
-        return doc.execCommand(command, false);
-      }
+      "default": 'left'
+    },
+    bullet: {
+      type: Format.types.LINE,
+      exclude: 'list',
+      parentTag: 'UL',
+      tag: 'LI'
+    },
+    list: {
+      type: Format.types.LINE,
+      exclude: 'bullet',
+      parentTag: 'OL',
+      tag: 'LI'
     }
   };
 
@@ -12980,12 +13000,22 @@ Format = (function() {
   }
 
   Format.prototype.add = function(node, value) {
-    var formatNode;
+    var formatNode, parentNode, _ref, _ref1;
     if (!value) {
       return this.remove(node);
     }
     if (this.value(node) === value) {
       return node;
+    }
+    if (_.isString(this.config.parentTag)) {
+      parentNode = this.document.createElement(this.config.parentTag);
+      DOM.wrap(parentNode, node);
+      if (node.parentNode.tagName === ((_ref = node.parentNode.previousSibling) != null ? _ref.tagName : void 0)) {
+        Utils.mergeNodes(node.parentNode.previousSibling, node.parentNode);
+      }
+      if (node.parentNode.tagName === ((_ref1 = node.parentNode.nextSibling) != null ? _ref1.tagName : void 0)) {
+        Utils.mergeNodes(node.parentNode, node.parentNode.nextSibling);
+      }
     }
     if (_.isString(this.config.tag)) {
       formatNode = this.document.createElement(this.config.tag);
@@ -12995,6 +13025,8 @@ Format = (function() {
         }
         DOM.removeNode(node);
         node = formatNode;
+      } else if (this.isType(Format.types.LINE)) {
+        node = DOM.switchTag(node, this.config.tag);
       } else {
         node = DOM.wrap(formatNode, node);
       }
@@ -13026,8 +13058,11 @@ Format = (function() {
   };
 
   Format.prototype.match = function(node) {
-    var c, _i, _len, _ref;
+    var c, _i, _len, _ref, _ref1;
     if (!DOM.isElement(node)) {
+      return false;
+    }
+    if (_.isString(this.config.parentTag) && ((_ref = node.parentNode) != null ? _ref.tagName : void 0) !== this.config.parentTag) {
       return false;
     }
     if (_.isString(this.config.tag) && node.tagName !== this.config.tag) {
@@ -13040,9 +13075,9 @@ Format = (function() {
       return false;
     }
     if (_.isString(this.config["class"])) {
-      _ref = DOM.getClasses(node);
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        c = _ref[_i];
+      _ref1 = DOM.getClasses(node);
+      for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+        c = _ref1[_i];
         if (c.indexOf(this.config["class"]) === 0) {
           return true;
         }
@@ -13087,10 +13122,23 @@ Format = (function() {
       }
     }
     if (_.isString(this.config.tag)) {
-      node = DOM.switchTag(node, DOM.DEFAULT_INLINE_TAG);
-      if (DOM.EMBED_TAGS[this.config.tag] != null) {
-        DOM.setText(node, DOM.EMBED_TEXT);
+      if (this.isType(Format.types.LINE)) {
+        if (node.previousSibling != null) {
+          Utils.splitAncestors(node, node.parentNode.parentNode);
+        }
+        if (node.nextSibling != null) {
+          Utils.splitAncestors(node.nextSibling, node.parentNode.parentNode);
+        }
+        node = DOM.switchTag(node, DOM.DEFAULT_BLOCK_TAG);
+      } else {
+        node = DOM.switchTag(node, DOM.DEFAULT_INLINE_TAG);
+        if (DOM.EMBED_TAGS[this.config.tag] != null) {
+          DOM.setText(node, DOM.EMBED_TEXT);
+        }
       }
+    }
+    if (_.isString(this.config.parentTag)) {
+      DOM.unwrap(node.parentNode);
     }
     if (node.tagName === DOM.DEFAULT_INLINE_TAG && !node.hasAttributes()) {
       node = DOM.unwrap(node);
@@ -13105,7 +13153,7 @@ Format = (function() {
     }
     if (_.isString(this.config.attribute)) {
       return node.getAttribute(this.config.attribute) || void 0;
-    } else if (_.isString(this.config.style) && node.style[this.config.style] !== this.config["default"]) {
+    } else if (_.isString(this.config.style)) {
       return node.style[this.config.style] || void 0;
     } else if (_.isString(this.config["class"])) {
       _ref = DOM.getClasses(node);
@@ -13115,7 +13163,7 @@ Format = (function() {
           return c.slice(this.config["class"].length);
         }
       }
-    } else if (_.isString(this.config.tag) && node.tagName === this.config.tag) {
+    } else if (_.isString(this.config.tag)) {
       return true;
     }
     return void 0;
@@ -13217,7 +13265,7 @@ ColorPicker = (function(_super) {
 
   function ColorPicker() {
     ColorPicker.__super__.constructor.apply(this, arguments);
-    DOM.addClass(this.container, 'sc-color-picker');
+    DOM.addClass(this.container, 'ql-color-picker');
   }
 
   ColorPicker.prototype.buildItem = function(picker, option, index) {
@@ -13335,13 +13383,13 @@ DOM = _dereq_('../dom');
 Normalizer = _dereq_('../normalizer');
 
 Picker = (function() {
-  Picker.TEMPLATE = '<span class="sc-picker-label"></span><span class="sc-picker-options"></span>';
+  Picker.TEMPLATE = '<span class="ql-picker-label"></span><span class="ql-picker-options"></span>';
 
   function Picker(select) {
     this.select = select;
     this.container = this.select.ownerDocument.createElement('span');
     this.buildPicker();
-    DOM.addClass(this.container, 'sc-picker');
+    DOM.addClass(this.container, 'ql-picker');
     this.select.style.display = 'none';
     this.select.parentNode.insertBefore(this.container, this.select);
     DOM.addEventListener(this.select.ownerDocument, 'click', (function(_this) {
@@ -13353,7 +13401,7 @@ Picker = (function() {
     DOM.addEventListener(this.label, 'click', (function(_this) {
       return function() {
         return _.defer(function() {
-          return DOM.toggleClass(_this.container, 'sc-expanded');
+          return DOM.toggleClass(_this.container, 'ql-expanded');
         });
       };
     })(this));
@@ -13361,11 +13409,11 @@ Picker = (function() {
       return function() {
         var item, option;
         if (_this.select.selectedIndex > -1) {
-          item = _this.container.querySelectorAll('.sc-picker-item')[_this.select.selectedIndex];
+          item = _this.container.querySelectorAll('.ql-picker-item')[_this.select.selectedIndex];
           option = _this.select.options[_this.select.selectedIndex];
         }
         _this.selectItem(item, false);
-        return DOM.toggleClass(_this.label, 'sc-active', option !== DOM.getDefaultOption(_this.select));
+        return DOM.toggleClass(_this.label, 'ql-active', option !== DOM.getDefaultOption(_this.select));
       };
     })(this));
   }
@@ -13374,7 +13422,7 @@ Picker = (function() {
     var item;
     item = this.select.ownerDocument.createElement('span');
     item.setAttribute('data-value', option.getAttribute('value'));
-    DOM.addClass(item, 'sc-picker-item');
+    DOM.addClass(item, 'ql-picker-item');
     DOM.setText(item, DOM.getText(option));
     if (this.select.selectedIndex === index) {
       this.selectItem(item, false);
@@ -13396,8 +13444,8 @@ Picker = (function() {
       };
     })(this));
     this.container.innerHTML = Normalizer.stripWhitespace(Picker.TEMPLATE);
-    this.label = this.container.querySelector('.sc-picker-label');
-    picker = this.container.querySelector('.sc-picker-options');
+    this.label = this.container.querySelector('.ql-picker-label');
+    picker = this.container.querySelector('.ql-picker-options');
     return _.each(this.select.options, (function(_this) {
       return function(option, i) {
         var item;
@@ -13408,18 +13456,18 @@ Picker = (function() {
   };
 
   Picker.prototype.close = function() {
-    return DOM.removeClass(this.container, 'sc-expanded');
+    return DOM.removeClass(this.container, 'ql-expanded');
   };
 
   Picker.prototype.selectItem = function(item, trigger) {
     var selected, value;
-    selected = this.container.querySelector('.sc-selected');
+    selected = this.container.querySelector('.ql-selected');
     if (selected != null) {
-      DOM.removeClass(selected, 'sc-selected');
+      DOM.removeClass(selected, 'ql-selected');
     }
     if (item != null) {
       value = item.getAttribute('data-value');
-      DOM.addClass(item, 'sc-selected');
+      DOM.addClass(item, 'ql-selected');
       DOM.setText(this.label, DOM.getText(item));
       DOM.selectOption(this.select, value, trigger);
       return this.label.setAttribute('data-value', value);
@@ -13536,7 +13584,7 @@ Line = (function(_super) {
         node = Normalizer.normalizeNode(node);
         nodeFormats = _.clone(formats);
         _.each(_this.doc.formats, function(format, name) {
-          if (format.match(node)) {
+          if (!format.isType(Format.types.LINE) && format.match(node)) {
             return nodeFormats[name] = format.value(node);
           }
         });
@@ -13606,9 +13654,16 @@ Line = (function(_super) {
     }
     _.each(formats, (function(_this) {
       return function(value, name) {
-        var format;
+        var excludeFormat, format;
         format = _this.doc.formats[name];
         if (format.isType(Format.types.LINE)) {
+          if (format.config.exclude && _this.formats[format.config.exclude]) {
+            excludeFormat = _this.doc.formats[format.config.exclude];
+            if (excludeFormat != null) {
+              _this.node = excludeFormat.remove(_this.node);
+              delete _this.formats[format.config.exclude];
+            }
+          }
           _this.node = format.add(_this.node, value);
         }
         if (value) {
@@ -13812,8 +13867,8 @@ Authorship = (function() {
   Authorship.prototype.attachButton = function(button) {
     return DOM.addEventListener(button, 'click', (function(_this) {
       return function() {
-        DOM.toggleClass(button, 'sc-on');
-        return _this.enable(DOM.hasClass(button, 'sc-on'));
+        DOM.toggleClass(button, 'ql-on');
+        return _this.enable(DOM.hasClass(button, 'ql-on'));
       };
     })(this));
   };
@@ -14227,10 +14282,17 @@ LinkTooltip = (function(_super) {
   };
 
   LinkTooltip.prototype.saveLink = function() {
-    var url;
+    var anchor, url;
     url = this._normalizeURL(this.textbox.value);
     if (this.range != null) {
-      this.quill.formatText(this.range, 'link', url, 'user');
+      if (this.range.isCollapsed()) {
+        anchor = this._findAnchor(this.range);
+        if (anchor != null) {
+          anchor.href = url;
+        }
+      } else {
+        this.quill.formatText(this.range, 'link', url, 'user');
+      }
     }
     return this.setMode(url, false);
   };
@@ -14382,14 +14444,10 @@ MultiCursor = (function(_super) {
     return this.cursors = {};
   };
 
-  MultiCursor.prototype.moveCursor = function(userId, index, update) {
+  MultiCursor.prototype.moveCursor = function(userId, index) {
     var cursor;
-    if (update == null) {
-      update = true;
-    }
     cursor = this.cursors[userId];
     cursor.index = index;
-    cursor.dirty = true;
     DOM.removeClass(cursor.elem, 'hidden');
     clearTimeout(cursor.timer);
     cursor.timer = setTimeout((function(_this) {
@@ -14398,9 +14456,7 @@ MultiCursor = (function(_super) {
         return cursor.timer = null;
       };
     })(this), this.options.timeout);
-    if (update) {
-      this._updateCursor(cursor);
-    }
+    this._updateCursor(cursor);
     return cursor;
   };
 
@@ -14414,11 +14470,8 @@ MultiCursor = (function(_super) {
     return delete this.cursors[userId];
   };
 
-  MultiCursor.prototype.setCursor = function(userId, index, name, color, update) {
+  MultiCursor.prototype.setCursor = function(userId, index, name, color) {
     var cursor;
-    if (update == null) {
-      update = true;
-    }
     if (this.cursors[userId] == null) {
       this.cursors[userId] = cursor = {
         userId: userId,
@@ -14430,45 +14483,34 @@ MultiCursor = (function(_super) {
     }
     _.defer((function(_this) {
       return function() {
-        return _this.moveCursor(userId, index, update);
+        return _this.moveCursor(userId, index);
       };
     })(this));
     return this.cursors[userId];
   };
 
-  MultiCursor.prototype.shiftCursors = function(index, length, authorId, update) {
+  MultiCursor.prototype.shiftCursors = function(index, length, authorId) {
     if (authorId == null) {
       authorId = null;
     }
-    if (update == null) {
-      update = true;
-    }
-    _.each(this.cursors, (function(_this) {
+    return _.each(this.cursors, (function(_this) {
       return function(cursor, id) {
         if (!(cursor && (cursor.index > index || cursor.userId === authorId))) {
           return;
         }
-        cursor.index += Math.max(length, index - cursor.index);
-        return cursor.dirty = true;
+        return cursor.index += Math.max(length, index - cursor.index);
       };
     })(this));
-    if (update) {
-      return this.update();
-    }
   };
 
-  MultiCursor.prototype.update = function(force) {
-    if (force == null) {
-      force = false;
-    }
+  MultiCursor.prototype.update = function() {
     return _.each(this.cursors, (function(_this) {
       return function(cursor, id) {
         if (cursor == null) {
           return;
         }
-        if (cursor.dirty || force) {
-          return _this._updateCursor(cursor);
-        }
+        _this._updateCursor(cursor);
+        return true;
       };
     })(this));
   };
@@ -14476,15 +14518,15 @@ MultiCursor = (function(_super) {
   MultiCursor.prototype._applyDelta = function(delta) {
     delta.apply((function(_this) {
       return function(index, text, formatting) {
-        return _this.shiftCursors(index, text.length, formatting['author'], false);
+        return _this.shiftCursors(index, text.length, formatting['author']);
       };
     })(this), (function(_this) {
       return function(index, length) {
-        return _this.shiftCursors(index, -1 * length, null, false);
+        return _this.shiftCursors(index, -1 * length, null);
       };
     })(this), (function(_this) {
       return function(index, length, name, value) {
-        return _this.shiftCursors(index, 0, null, false);
+        return _this.shiftCursors(index, 0, null);
       };
     })(this));
     return this.update();
@@ -14522,6 +14564,7 @@ MultiCursor = (function(_super) {
 
   MultiCursor.prototype._updateCursor = function(cursor) {
     var didSplit, guide, leaf, leftNode, offset, rightNode, _ref, _ref1;
+    this.quill.editor.checkUpdate();
     _ref = this.quill.editor.doc.findLeafAt(cursor.index, true), leaf = _ref[0], offset = _ref[1];
     guide = this.container.ownerDocument.createElement('span');
     if (leaf != null) {
@@ -14537,7 +14580,7 @@ MultiCursor = (function(_super) {
     if (didSplit) {
       DOM.normalize(leaf.node.parentNode);
     }
-    return cursor.dirty = false;
+    return this.quill.editor.selection.update('silent');
   };
 
   return MultiCursor;
@@ -14627,16 +14670,10 @@ Toolbar = (function() {
   };
 
   Toolbar.formats = {
-    BUTTON: {
-      'bold': 'bold',
-      'image': 'image',
-      'italic': 'italic',
-      'link': 'link',
-      'strike': 'strike',
-      'underline': 'underline'
-    },
     LINE: {
-      'align': 'align'
+      'align': 'align',
+      'bullet': 'bullet',
+      'list': 'list'
     },
     SELECT: {
       'align': 'align',
@@ -14644,6 +14681,16 @@ Toolbar = (function() {
       'color': 'color',
       'font': 'font',
       'size': 'size'
+    },
+    TOGGLE: {
+      'bold': 'bold',
+      'bullet': 'bullet',
+      'image': 'image',
+      'italic': 'italic',
+      'link': 'link',
+      'list': 'list',
+      'strike': 'strike',
+      'underline': 'underline'
     },
     TOOLTIP: {
       'image': 'image',
@@ -14677,12 +14724,15 @@ Toolbar = (function() {
           } else {
             _this.quill.formatText(range, format, value, 'user');
           }
-          return _this.setActive(format, value);
+          return _.defer(function() {
+            _this.updateActive(range);
+            return _this.setActive(format, value);
+          });
         });
       };
     })(this));
     this.quill.on(this.quill.constructor.events.SELECTION_CHANGE, _.bind(this.updateActive, this));
-    DOM.addClass(this.container, 'sc-toolbar-container');
+    DOM.addClass(this.container, 'ql-toolbar-container');
     if (DOM.isIOS()) {
       DOM.addClass(this.container, 'ios');
     }
@@ -14697,7 +14747,7 @@ Toolbar = (function() {
 
   Toolbar.prototype.initFormat = function(format, callback) {
     var eventName, input, selector;
-    selector = ".sc-" + format;
+    selector = ".ql-" + format;
     if (Toolbar.formats.SELECT[format] != null) {
       selector = "select" + selector;
       eventName = 'change';
@@ -14712,7 +14762,7 @@ Toolbar = (function() {
     return DOM.addEventListener(input, eventName, (function(_this) {
       return function() {
         var range, value;
-        value = eventName === 'change' ? DOM.getSelectValue(input) : !DOM.hasClass(input, 'sc-active');
+        value = eventName === 'change' ? DOM.getSelectValue(input) : !DOM.hasClass(input, 'ql-active');
         _this.preventUpdate = true;
         _this.quill.focus();
         range = _this.quill.getSelection();
@@ -14746,7 +14796,7 @@ Toolbar = (function() {
       }
       return this.triggering = false;
     } else {
-      return DOM.toggleClass(input, 'sc-active', value || false);
+      return DOM.toggleClass(input, 'ql-active', value || false);
     }
   };
 
@@ -14768,14 +14818,18 @@ Toolbar = (function() {
     var leafFormats, lineFormats;
     leafFormats = this._getLeafActive(range);
     lineFormats = this._getLineActive(range);
-    return _.defaults(leafFormats, lineFormats);
+    return _.defaults({}, leafFormats, lineFormats);
   };
 
   Toolbar.prototype._getLeafActive = function(range) {
-    var contents, formatsArr, start;
+    var contents, formatsArr, line, offset, _ref;
     if (range.isCollapsed()) {
-      start = Math.max(0, range.start - 1);
-      contents = this.quill.getContents(start, range.end);
+      _ref = this.quill.editor.doc.findLineAt(range.start), line = _ref[0], offset = _ref[1];
+      if (offset === 0) {
+        contents = this.quill.getContents(range.start, range.end + 1);
+      } else {
+        contents = this.quill.getContents(range.start - 1, range.end);
+      }
     } else {
       contents = this.quill.getContents(range);
     }
@@ -14784,7 +14838,7 @@ Toolbar = (function() {
   };
 
   Toolbar.prototype._getLineActive = function(range) {
-    var firstLine, formats, formatsArr, lastLine, offset, _ref, _ref1;
+    var firstLine, formatsArr, lastLine, offset, _ref, _ref1;
     formatsArr = [];
     _ref = this.quill.editor.doc.findLineAt(range.start), firstLine = _ref[0], offset = _ref[1];
     _ref1 = this.quill.editor.doc.findLineAt(range.end), lastLine = _ref1[0], offset = _ref1[1];
@@ -14792,10 +14846,7 @@ Toolbar = (function() {
       lastLine = lastLine.next;
     }
     while ((firstLine != null) && firstLine !== lastLine) {
-      formats = {
-        'align': firstLine.formats['align']
-      };
-      formatsArr.push(firstLine.formats);
+      formatsArr.push(_.clone(firstLine.formats));
       firstLine = firstLine.next;
     }
     return this._intersectFormats(formatsArr);
@@ -14821,7 +14872,7 @@ Toolbar = (function() {
         }
       });
       _.each(missing, function(name) {
-        if (Toolbar.formats.BUTTON[name] != null) {
+        if (Toolbar.formats.TOGGLE[name] != null) {
           return delete activeFormats[name];
         } else if ((Toolbar.formats.SELECT[name] != null) && !_.isArray(activeFormats[name])) {
           return activeFormats[name] = [activeFormats[name]];
@@ -15159,7 +15210,9 @@ Normalizer = {
     'S': 'S',
     'U': 'U',
     'A': 'A',
-    'IMG': 'IMG'
+    'IMG': 'IMG',
+    'UL': 'UL',
+    'LI': 'LI'
   },
   handleBreaks: function(lineNode) {
     var breaks;
@@ -15176,7 +15229,7 @@ Normalizer = {
   normalizeLine: function(lineNode) {
     lineNode = Normalizer.wrapInline(lineNode);
     lineNode = Normalizer.handleBreaks(lineNode);
-    Normalizer.pullBlocks(lineNode);
+    lineNode = Normalizer.pullBlocks(lineNode);
     lineNode = Normalizer.normalizeNode(lineNode);
     Normalizer.unwrapText(lineNode);
     return lineNode;
@@ -15224,9 +15277,7 @@ Normalizer = {
       } else if ((node.previousSibling != null) && node.tagName === node.previousSibling.tagName) {
         if (_.isEqual(DOM.getAttributes(node), DOM.getAttributes(node.previousSibling))) {
           nodes.push(node.firstChild);
-          DOM.moveChildren(node.previousSibling, node);
-          DOM.normalize(node.previousSibling);
-          _results.push(DOM.removeNode(node));
+          _results.push(Utils.mergeNodes(node.previousSibling, node));
         } else {
           _results.push(void 0);
         }
@@ -15237,31 +15288,33 @@ Normalizer = {
     return _results;
   },
   pullBlocks: function(lineNode) {
-    var curNode, _results;
+    var curNode;
     curNode = lineNode.firstChild;
-    if (curNode == null) {
-      return;
-    }
-    if (DOM.BLOCK_TAGS[curNode.tagName] != null) {
-      if (curNode.nextSibling != null) {
-        Utils.splitAncestors(curNode.nextSibling, lineNode.parentNode);
-      }
-      DOM.unwrap(curNode);
-      Normalizer.pullBlocks(lineNode);
-    }
-    curNode = curNode.nextSibling;
-    _results = [];
     while (curNode != null) {
-      if (DOM.BLOCK_TAGS[curNode.tagName] != null) {
-        lineNode = Utils.splitAncestors(curNode, lineNode.parentNode);
+      if ((DOM.BLOCK_TAGS[curNode.tagName] != null) && curNode.tagName !== 'LI') {
+        if (curNode.previousSibling != null) {
+          Utils.splitAncestors(curNode, lineNode.parentNode);
+        }
+        if (curNode.nextSibling != null) {
+          Utils.splitAncestors(curNode.nextSibling, lineNode.parentNode);
+        }
+        if (DOM.LIST_TAGS[curNode.tagName] == null) {
+          DOM.unwrap(curNode);
+          Normalizer.pullBlocks(lineNode);
+        } else {
+          DOM.unwrap(curNode.parentNode);
+          if (lineNode.parentNode == null) {
+            lineNode = curNode;
+          }
+        }
         break;
       }
-      _results.push(curNode = curNode.nextSibling);
+      curNode = curNode.nextSibling;
     }
-    return _results;
+    return lineNode;
   },
   stripComments: function(html) {
-    return html = html.replace(/<!--[\s\S]*?-->/g, '');
+    return html.replace(/<!--[\s\S]*?-->/g, '');
   },
   stripWhitespace: function(html) {
     html = html.replace(/^\s+/, '').replace(/\s+$/, '');
@@ -15382,7 +15435,7 @@ Quill = (function(_super) {
   Quill.Theme = Themes;
 
   Quill.DEFAULTS = {
-    formats: ['align', 'bold', 'italic', 'strike', 'underline', 'color', 'background', 'font', 'size', 'link', 'image'],
+    formats: ['align', 'bold', 'italic', 'strike', 'underline', 'color', 'background', 'font', 'size', 'link', 'image', 'bullet', 'list'],
     modules: {
       'keyboard': true,
       'paste-manager': true,
@@ -15397,7 +15450,6 @@ Quill = (function(_super) {
     MODULE_INIT: 'module-init',
     POST_EVENT: 'post-event',
     PRE_EVENT: 'pre-event',
-    RENDER_UPDATE: 'renderer-update',
     SELECTION_CHANGE: 'selection-change',
     TEXT_CHANGE: 'text-change'
   };
@@ -15508,9 +15560,6 @@ Quill = (function(_super) {
   Quill.prototype.formatText = function(start, end, name, value, source) {
     var delta, formats, _ref;
     _ref = this._buildParams(start, end, name, value, source), start = _ref[0], end = _ref[1], formats = _ref[2], source = _ref[3];
-    if (!(end > start)) {
-      return;
-    }
     formats = _.reduce(formats, (function(_this) {
       return function(formats, value, name) {
         var format;
@@ -15607,7 +15656,11 @@ Quill = (function(_super) {
     if (!(range != null ? range.isCollapsed() : void 0)) {
       return;
     }
-    return format.prepare(value);
+    if (format.isType(Format.types.LINE)) {
+      return this.formatLine(range, name, value, Quill.sources.USER);
+    } else {
+      return format.prepare(value);
+    }
   };
 
   Quill.prototype.setContents = function(delta, source) {
@@ -15615,15 +15668,14 @@ Quill = (function(_super) {
       source = Quill.sources.API;
     }
     if (_.isArray(delta)) {
-      delta = Tandem.Delta.makeDelta({
+      delta = {
         startLength: this.getLength(),
         ops: delta
-      });
+      };
     } else {
-      delta = Tandem.Delta.makeDelta(delta);
       delta.startLength = this.getLength();
     }
-    return this.editor.applyDelta(delta, source);
+    return this.updateContents(delta, source);
   };
 
   Quill.prototype.setHTML = function(html, source) {
@@ -15655,6 +15707,7 @@ Quill = (function(_super) {
     if (source == null) {
       source = Quill.sources.API;
     }
+    delta = Tandem.Delta.makeDelta(delta);
     return this.editor.applyDelta(delta, source);
   };
 
@@ -15787,11 +15840,13 @@ Renderer = (function() {
   Renderer.buildFrame = function(container) {
     var iframe, iframeDoc, root;
     iframe = container.ownerDocument.createElement('iframe');
-    iframe.setAttribute('frameBorder', '0');
-    iframe.setAttribute('height', '100%');
-    iframe.setAttribute('width', '100%');
-    iframe.setAttribute('title', 'Quill Rich Text Editor');
-    iframe.setAttribute('role', 'presentation');
+    DOM.setAttributes(iframe, {
+      frameBorder: '0',
+      height: '100%',
+      width: '100%',
+      title: 'Quill Rich Text Editor',
+      role: 'presentation'
+    });
     container.appendChild(iframe);
     iframeDoc = iframe.contentWindow.document;
     iframeDoc.open();
@@ -15802,21 +15857,26 @@ Renderer = (function() {
     return [root, iframe];
   };
 
-  function Renderer(container, emitter, options) {
+  function Renderer(container, options) {
     var _ref;
     this.container = container;
-    this.emitter = emitter;
     this.options = options != null ? options : {};
     this.container.innerHTML = '';
     _ref = Renderer.buildFrame(this.container), this.root = _ref[0], this.iframe = _ref[1];
     this.root.id = this.options.id;
     DOM.addClass(this.root, 'editor-container');
-    DOM.addClass(this.container, 'sc-container');
+    DOM.addClass(this.container, 'ql-container');
     DOM.addEventListener(this.container, 'focus', (function(_this) {
       return function() {
         return _this.root.focus();
       };
     })(this));
+    if (DOM.isIOS()) {
+      DOM.addStyles(this.container, {
+        'overflow': 'auto',
+        '-webkit-overflow-scrolling': 'touch'
+      });
+    }
     this.addStyles(DEFAULT_STYLES);
     if (this.options.styles != null) {
       _.defer(_.bind(this.addStyles, this, this.options.styles));
@@ -15836,25 +15896,22 @@ Renderer = (function() {
   };
 
   Renderer.prototype.addStyles = function(css) {
-    var style;
-    style = this.root.ownerDocument.createElement('style');
-    style.type = 'text/css';
-    if (!_.isString(css)) {
+    var link, style;
+    if (typeof css === 'object') {
+      style = this.root.ownerDocument.createElement('style');
+      style.type = 'text/css';
       css = Renderer.objToCss(css);
-    }
-    if (style.styleSheet != null) {
-      style.styleSheet.cssText = css;
-    } else {
       style.appendChild(this.root.ownerDocument.createTextNode(css));
+      return this.root.ownerDocument.head.appendChild(style);
+    } else if (typeof css === 'string') {
+      link = this.root.ownerDocument.createElement('link');
+      DOM.setAttributes(link, {
+        type: 'text/css',
+        rel: 'stylesheet',
+        href: css
+      });
+      return this.root.ownerDocument.head.appendChild(link);
     }
-    return _.defer((function(_this) {
-      return function() {
-        _this.root.ownerDocument.querySelector('head').appendChild(style);
-        if (_this.emitter != null) {
-          return _this.emitter.emit(_this.emitter.constructor.events.RENDER_UPDATE, css);
-        }
-      };
-    })(this));
   };
 
   return Renderer;
@@ -15865,7 +15922,7 @@ module.exports = Renderer;
 
 
 },{"./dom":20,"./normalizer":38,"./utils":44,"lodash":"4HJaAd"}],41:[function(_dereq_,module,exports){
-var DOM, Leaf, Range, Selection, _;
+var DOM, Leaf, Normalizer, Range, Selection, Utils, _;
 
 _ = _dereq_('lodash');
 
@@ -15873,11 +15930,16 @@ DOM = _dereq_('./dom');
 
 Leaf = _dereq_('./leaf');
 
+Normalizer = _dereq_('./normalizer');
+
 Range = _dereq_('./lib/range');
 
+Utils = _dereq_('./utils');
+
 Selection = (function() {
-  function Selection(doc, emitter) {
+  function Selection(doc, iframe, emitter) {
     this.doc = doc;
+    this.iframe = iframe;
     this.emitter = emitter;
     this.document = this.doc.root.ownerDocument;
     this.range = this.getRange();
@@ -15885,7 +15947,13 @@ Selection = (function() {
   }
 
   Selection.prototype.checkFocus = function() {
-    return this.document.activeElement === this.doc.root;
+    if (this.document.activeElement !== this.doc.root) {
+      return false;
+    }
+    if ((document.activeElement != null) && document.activeElement.tagName === 'IFRAME') {
+      return document.activeElement === this.iframe;
+    }
+    return true;
   };
 
   Selection.prototype.getRange = function() {
@@ -15898,10 +15966,10 @@ Selection = (function() {
       return null;
     }
     start = this._positionToIndex(nativeRange.startContainer, nativeRange.startOffset);
-    if (nativeRange.endContainer !== nativeRange.startContainer) {
-      end = this._positionToIndex(nativeRange.endContainer, nativeRange.endOffset);
+    if (nativeRange.startContainer === nativeRange.endContainer && nativeRange.startOffset === nativeRange.endOffset) {
+      end = start;
     } else {
-      end = start - nativeRange.startOffset + nativeRange.endOffset;
+      end = this._positionToIndex(nativeRange.endContainer, nativeRange.endOffset);
     }
     return new Range(Math.min(start, end), Math.max(start, end));
   };
@@ -15973,6 +16041,7 @@ Selection = (function() {
   };
 
   Selection.prototype._encodePosition = function(node, offset) {
+    var text;
     while (true) {
       if (DOM.isTextNode(node) || node.tagName === DOM.DEFAULT_BREAK_TAG || (DOM.EMBED_TAGS[node.tagName] != null)) {
         return [node, offset];
@@ -15980,10 +16049,23 @@ Selection = (function() {
         node = node.childNodes[offset];
         offset = 0;
       } else if (node.childNodes.length === 0) {
+        if (Normalizer.TAGS[node.tagName] == null) {
+          text = node.ownerDocument.createTextNode('');
+          node.appendChild(text);
+          node = text;
+        }
         return [node, 0];
       } else {
         node = node.lastChild;
-        offset = node.childNodes.length + 1;
+        if (DOM.isElement(node)) {
+          if (node.tagName === DOM.DEFAULT_BREAK_TAG || (DOM.EMBED_TAGS[node.tagName] != null)) {
+            return [node, 1];
+          } else {
+            offset = node.childNodes.length;
+          }
+        } else {
+          return [node, Utils.getNodeLength(node)];
+        }
       }
     }
   };
@@ -16072,7 +16154,7 @@ Selection = (function() {
 module.exports = Selection;
 
 
-},{"./dom":20,"./leaf":23,"./lib/range":27,"lodash":"4HJaAd"}],42:[function(_dereq_,module,exports){
+},{"./dom":20,"./leaf":23,"./lib/range":27,"./normalizer":38,"./utils":44,"lodash":"4HJaAd"}],42:[function(_dereq_,module,exports){
 var DefaultTheme;
 
 DefaultTheme = (function() {
@@ -16221,7 +16303,7 @@ SnowTheme = (function(_super) {
     _.each(['color', 'background', 'font', 'size', 'align'], (function(_this) {
       return function(format) {
         var picker, select;
-        select = module.container.querySelector(".sc-" + format);
+        select = module.container.querySelector(".ql-" + format);
         if (select == null) {
           return;
         }
@@ -16234,9 +16316,9 @@ SnowTheme = (function(_super) {
           case 'color':
           case 'background':
             picker = new ColorPicker(select);
-            _.each(picker.container.querySelectorAll('.sc-picker-item'), function(item, i) {
+            _.each(picker.container.querySelectorAll('.ql-picker-item'), function(item, i) {
               if (i < 7) {
-                return DOM.addClass(item, 'sc-primary-color');
+                return DOM.addClass(item, 'ql-primary-color');
               }
             });
         }
@@ -16302,6 +16384,17 @@ Utils = {
     }
     return [child, offset];
   },
+  getNextLineNode: function(curNode, root) {
+    var nextNode;
+    nextNode = curNode.nextSibling;
+    if ((nextNode == null) && curNode.parentNode !== root) {
+      nextNode = curNode.parentNode.nextSibling;
+    }
+    if ((nextNode != null) && (DOM.LIST_TAGS[nextNode.tagName] != null)) {
+      nextNode = nextNode.firstChild;
+    }
+    return nextNode;
+  },
   getNodeLength: function(node) {
     var length;
     if (node == null) {
@@ -16317,6 +16410,17 @@ Utils = {
     var version;
     version = document.documentMode;
     return version && maxVersion >= version;
+  },
+  mergeNodes: function(newNode, oldNode) {
+    var text;
+    if (DOM.isElement(newNode)) {
+      DOM.moveChildren(newNode, oldNode);
+      DOM.normalize(newNode);
+    } else {
+      text = DOM.getText(newNode) + DOM.getText(oldNode);
+      DOM.setText(newNode, text);
+    }
+    return DOM.removeNode(oldNode);
   },
   splitAncestors: function(refNode, root, force) {
     var nextNode, parentClone, parentNode;
