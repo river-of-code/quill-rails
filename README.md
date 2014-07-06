@@ -55,6 +55,12 @@ To have an id that's different from the name:
 <%= quill_editor nil, { name: 'my-name', id: 'my-id' } %>
 ```
 
+To have a value on load:
+
+```
+<%= quill_editor nil, { name: 'my-name', value: 'Awesome!' } %>
+```
+
 ## Custom Functionality
 
 Because this includes Quill assets, you can also refer to the [Quill Documentation](http://quilljs.com/docs/editor/) to use other, more custom, features.
