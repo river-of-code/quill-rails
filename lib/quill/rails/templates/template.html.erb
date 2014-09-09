@@ -1,5 +1,5 @@
 <div class="quill-wrapper">
- <div id="full-toolbar" class="toolbar">
+ <div id="full-toolbar-<%= @input_id %>" class="toolbar">
     <span class="ql-format-group">
       <select title="Font" class="ql-font">
         <option value="sans-serif" selected="">Sans Serif</option>
@@ -115,7 +115,7 @@
       <span title="Link" class="ql-format-button ql-link"></span>
     </span>
   </div>
-  <div id="full-editor" class="editor ql-container"><%= @value %></div>
+  <div id="full-editor-<%= @input_id %>" class="editor ql-container"><%= @value %></div>
   <input type='hidden' name='<%= @input_name %>' id='<%= @input_id %>' value=''/>
 
   <script type='text/javascript'>
@@ -125,9 +125,9 @@
         document.getElementById('<%= @input_id %>').value = fullEditor.getHTML()
       }
 
-      var fullEditor = new Quill('#full-editor', {
+      var fullEditor = new Quill('#full-editor-<%= @input_id %>', {
         modules: {
-          'toolbar': { container: '#full-toolbar' },
+          'toolbar': { container: '#full-toolbar-<%= @input_id %>' },
           'link-tooltip': true
         },
         theme: 'snow'
