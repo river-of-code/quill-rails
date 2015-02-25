@@ -120,23 +120,31 @@
 
   <script type='text/javascript'>
     (function() {
-      // Initialize editor with custom theme and modules
-      function copyToInput() {
-        document.getElementById('<%= @input_id %>').value = fullEditor.getHTML()
+      function initQuill() {
+        if (typeof Quill != 'undefined'){
+          // Initialize editor with custom theme and modules
+          function copyToInput() {
+            document.getElementById('<%= @input_id %>').value = fullEditor.getHTML()
+          }
+
+          var fullEditor = new Quill('#full-editor-<%= @input_id %>', {
+            modules: {
+              'toolbar': { container: '#full-toolbar-<%= @input_id %>' },
+              'link-tooltip': true
+            },
+            theme: 'snow'
+          });
+
+          fullEditor.on('text-change', function(delta, source) {
+            copyToInput()
+          });
+          copyToInput()
+        } else { 
+          setTimeout(initQuill, 50);
+        }        
       }
 
-      var fullEditor = new Quill('#full-editor-<%= @input_id %>', {
-        modules: {
-          'toolbar': { container: '#full-toolbar-<%= @input_id %>' },
-          'link-tooltip': true
-        },
-        theme: 'snow'
-      });
-
-      fullEditor.on('text-change', function(delta, source) {
-        copyToInput()
-      });
-      copyToInput()
+      initQuill();
     })()
   </script>
 </div>
