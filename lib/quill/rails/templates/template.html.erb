@@ -135,7 +135,7 @@
             theme: 'snow'
           });
 
-          content = document.getElementById('<%= @input_id %>').val()
+          content = document.getElementById('<%= @input_id %>').value
           fullEditor.setHTML(content)
 
           fullEditor.on('text-change', function(delta, source) {
